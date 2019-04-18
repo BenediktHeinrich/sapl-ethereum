@@ -23,10 +23,10 @@ contract Authorization {
     users[user].authorized = true;
   }
 
-  function disauthorize (address user) public {
+  function unauthorize (address user) public {
     require(
       msg.sender == admin,
-      "Only the admin can disauthorize users."
+      "Only the admin can unauthorize users."
     );
 
     users[user].authorized = false;

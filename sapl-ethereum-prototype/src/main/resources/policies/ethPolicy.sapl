@@ -1,0 +1,4 @@
+policy "eth_policy"
+permit
+  
+where subject.<ethereum.authorized>;

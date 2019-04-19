@@ -3,7 +3,9 @@ package io.sapl.ethereum;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.EventListener;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -16,15 +18,21 @@ import io.sapl.api.pdp.Response;
 import io.sapl.pdp.embedded.EmbeddedPolicyDecisionPoint;
 import io.sapl.ethereum.contracts.Authorization;
 
+@EntityScan
 @SpringBootApplication
 public class SaplEthereumPrototypeApplication {
 	
-	public final String USER1_WALLET = "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2";
-	public final String USER1 = "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
-	public final String USER2 = "0x91b6eac43acf5fc115fb30bf8ecc348d1c8d474b";
+	private static final String USER1_WALLET = "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2";
+	private static final String USER1 = "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
+	private static final String USER2 = "0x91b6eac43acf5fc115fb30bf8ecc348d1c8d474b";
 
 	public static void main(String[] args) {
 		SpringApplication.run(SaplEthereumPrototypeApplication.class, args);
+	}
+	
+	@Bean
+	public EthereumPIP ethPIP() {
+		return new EthereumPIP();
 	}
 	
 	@EventListener(ApplicationReadyEvent.class)
@@ -51,9 +59,10 @@ public class SaplEthereumPrototypeApplication {
 			PolicyDecisionPoint pdp = new EmbeddedPolicyDecisionPoint("file:/home/bene/repos-linux/sapl-ethereum/sapl-ethereum-prototype/src/main/resources/policies/");
 			Response user1access = pdp.decide(USER1, "access", "ethereum");
 			Response user2access = pdp.decide(USER2, "access", "ethereum");
+			Response simpleTest = pdp.decide(USER1, "a", "b");
 			System.out.println("User1 Response: " + user1access);
 			System.out.println("User2 Response: " + user2access);
-			
+			System.out.println(simpleTest);			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

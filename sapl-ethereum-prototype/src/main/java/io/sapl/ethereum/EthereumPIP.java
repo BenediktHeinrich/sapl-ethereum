@@ -1,20 +1,30 @@
 package io.sapl.ethereum;
 
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tx.gas.DefaultGasProvider;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+
 import io.sapl.api.pip.Attribute;
 import io.sapl.api.pip.PolicyInformationPoint;
 import io.sapl.ethereum.contracts.Authorization;
 
-@PolicyInformationPoint(name="ethereum", description="checks if  user is authorized in ethereum contract")
+@Service
+@PolicyInformationPoint(name="ethereum", description="provides functions for connecting with ethereum contracts")
 public class EthereumPIP {
 	
-	@Attribute
-	public boolean authorized(String user) {
+	private final ObjectMapper mapper = new ObjectMapper();
+	
+	@Attribute(name="auth", docs="check if a user is authorized")
+	public JsonNode authorized(String user, Map<String, JsonNode> variables) {
 	System.out.println("Entered authorized...");
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
@@ -22,11 +32,11 @@ public class EthereumPIP {
 		
 		String contractAddress = javax.swing.JOptionPane.showInputDialog( "Please enter address of Authorization contract.");
 		Authorization authContract = Authorization.load(contractAddress , web3j, credentials, new DefaultGasProvider());
-		return authContract.isAuthorized(user).send();
+		return mapper.convertValue(authContract.isAuthorized(user).send(), JsonNode.class);
 	} catch (Exception e) {
 		
 	}
-	return false;
+	return JsonNodeFactory.instance.nullNode();
 	}
 	
 

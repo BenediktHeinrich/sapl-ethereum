@@ -3,7 +3,8 @@
 # The Converter creates abi and bin files in ./abi-bin and saves the Java form
 # directly in ../src/main/java/io/sapl/ethereum/contracts
 # Needed input is the name of the contract (without .sol)
-# Web3j CommandLineTools need to be installed (https://docs.web3j.io/command_line.html)
+# solc compiler needs to be installed
+# (https://solidity.readthedocs.io/en/v0.5.7/installing-solidity.html)
 
 
 WEB3J='./web3j-4.2.0/bin/web3j'

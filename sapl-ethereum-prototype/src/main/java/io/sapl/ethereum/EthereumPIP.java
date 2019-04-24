@@ -23,21 +23,26 @@ public class EthereumPIP {
 	
 	private final ObjectMapper mapper = new ObjectMapper();
 	
-	@Attribute(name="auth", docs="check if a user is authorized")
-	public JsonNode authorized(String user, Map<String, JsonNode> variables) {
+	@Attribute(name="autho", docs="check if a user is authorized")
+	public JsonNode authorized(JsonNode user, Map<String, JsonNode> variables) {
 	System.out.println("Entered authorized...");
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
 		Credentials credentials = WalletUtils.loadCredentials("", "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2");
+		EthUser ethUser = mapper.convertValue(user, EthUser.class);
 		
-		String contractAddress = javax.swing.JOptionPane.showInputDialog( "Please enter address of Authorization contract.");
+		String contractAddress = ethUser.ethContract;
 		Authorization authContract = Authorization.load(contractAddress , web3j, credentials, new DefaultGasProvider());
-		return mapper.convertValue(authContract.isAuthorized(user).send(), JsonNode.class);
+		return mapper.convertValue(authContract.isAuthorized(ethUser.ethAddress).send(), JsonNode.class);
 	} catch (Exception e) {
 		
 	}
 	return JsonNodeFactory.instance.nullNode();
 	}
 	
+	@Attribute(name="address")
+	public JsonNode returnEthAddress (JsonNode user, Map<String, JsonNode> variables) {
+		return mapper.convertValue(mapper.convertValue(user, EthUser.class).ethAddress, JsonNode.class);
+	}
 
 }

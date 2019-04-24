@@ -1,12 +1,25 @@
+import EthereumPIP as ethereum
+
 set "eth_policies"
 deny-unless-permit
+
 
 policy "simple_eth_policy"
 permit
   action=="access" && resource=="ethereum"
-where 
+where
   subject.<ethereum.auth>;
 
+
+
+policy "eth_pip_test"
+permit
+  action == "a"
+where
+  subject.<ethereum.address> == "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
+
+/*
 policy "simple_test"
-permit action == "a"
-where subject == "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
+permit action == "a" & resource == "b"
+where subject.ethAddress == "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
+*/

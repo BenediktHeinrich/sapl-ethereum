@@ -1,13 +1,15 @@
 package io.sapl.ethereum;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class EthUser {
 	
-	public EthUser(String address, String contract)
-	{
-		ethAddress = address;
-		ethContract = contract;
-	}
-	public String ethAddress;
-	public String ethContract;
+	private String ethAddress;
+	private String ethContract;
 
 }

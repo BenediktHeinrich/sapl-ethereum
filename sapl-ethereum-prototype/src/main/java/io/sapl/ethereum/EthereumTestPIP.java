@@ -19,30 +19,31 @@ import io.sapl.ethereum.contracts.Authorization;
 
 @Service
 @PolicyInformationPoint(name="ethereum", description="provides functions for connecting with ethereum contracts")
-public class EthereumPIP {
+public class EthereumTestPIP {
 	
 	private final ObjectMapper mapper = new ObjectMapper();
 	
-	@Attribute(name="autho", docs="check if a user is authorized")
+	@Attribute(name="auth", docs="check if a user is authorized")
 	public JsonNode authorized(JsonNode user, Map<String, JsonNode> variables) {
-	System.out.println("Entered authorized...");
+	System.out.println("Entered authorized now...");
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
 		Credentials credentials = WalletUtils.loadCredentials("", "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2");
 		EthUser ethUser = mapper.convertValue(user, EthUser.class);
 		
-		String contractAddress = ethUser.ethContract;
+		String contractAddress = ethUser.getEthContract();
 		Authorization authContract = Authorization.load(contractAddress , web3j, credentials, new DefaultGasProvider());
-		return mapper.convertValue(authContract.isAuthorized(ethUser.ethAddress).send(), JsonNode.class);
+		return mapper.convertValue(authContract.isAuthorized(ethUser.getEthAddress()).send(), JsonNode.class);
 	} catch (Exception e) {
-		
+		e.printStackTrace();
 	}
+	System.out.println("Returning null...");
 	return JsonNodeFactory.instance.nullNode();
 	}
 	
-	@Attribute(name="address")
+	@Attribute(name="getEthAddress")
 	public JsonNode returnEthAddress (JsonNode user, Map<String, JsonNode> variables) {
-		return mapper.convertValue(mapper.convertValue(user, EthUser.class).ethAddress, JsonNode.class);
+		return mapper.convertValue(mapper.convertValue(user, EthUser.class).getEthAddress(), JsonNode.class);
 	}
 
 }

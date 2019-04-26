@@ -50,7 +50,7 @@ public class EthereumTestPIP {
 		logger.error("The EthereumTestPip didn't work as expected.");
 		e.printStackTrace();
 	}
-	System.out.println("Returning null...");
+	logger.debug("Returning null...");
 	return JsonNodeFactory.instance.nullNode();
 	}
 	

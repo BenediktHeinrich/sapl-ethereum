@@ -15,4 +15,4 @@ Here you can find information on starting this Prototype.
 1. Navigate to the `ethereum-testnet` folder inside the project in a terminal or the PowerShell.
 1. Execute the `startChain` script to initialize and start a private, local version of the Ethereum blockchain.
 1. Start the `SaplEthererumPrototype` Application.
-1. After the Application has completed, type `exit` in the Geth console to stop the blockchain. If you used the script, the leftovers of the blockchain should be automatically deleted.
+1. After the Application has finished, type `exit` in the Geth console to stop the blockchain. If you used the script, the leftovers of the blockchain should be automatically deleted.

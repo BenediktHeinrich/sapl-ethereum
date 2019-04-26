@@ -12,6 +12,6 @@ Here you can find information on starting this Prototype.
 
 1. Clone this Repository.
 1. Download and install [Geth](https://geth.ethereum.org/downloads/) (This has been tested with version `1.8.27-stable`).
-1. Navigate to the `ethereum-testnet` folder inside the project inside a terminal or the PowerShell.
+1. Navigate to the `ethereum-testnet` folder inside the project in a terminal or the PowerShell.
 1. Execute the `startChain` script to initialize and start a private, local version of the Ethereum blockchain.
 1. Start the `SaplEthererumPrototype` Application.

@@ -2,6 +2,8 @@ package io.sapl.ethereum;
 
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
@@ -22,10 +24,11 @@ import io.sapl.ethereum.contracts.Authorization;
 public class EthereumTestPIP {
 	
 	private final ObjectMapper mapper = new ObjectMapper();
+	private static final Logger logger = LoggerFactory.getLogger(EthereumTestPIP.class);
 	
 	@Attribute(name="auth", docs="check if a user is authorized")
 	public JsonNode authorized(JsonNode user, Map<String, JsonNode> variables) {
-	System.out.println("Entered authorized now...");
+	logger.trace("Entered authorized now...");
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
 		Credentials credentials = WalletUtils.loadCredentials("", "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2");

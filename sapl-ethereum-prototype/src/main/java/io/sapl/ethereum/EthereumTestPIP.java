@@ -53,10 +53,6 @@ public class EthereumTestPIP {
 	logger.debug("Returning null...");
 	return JsonNodeFactory.instance.nullNode();
 	}
-	
-	@Attribute(name="getEthAddress")
-	public JsonNode returnEthAddress (JsonNode user, Map<String, JsonNode> variables) {
-		return mapper.convertValue(mapper.convertValue(user, EthUser.class).getEthAddress(), JsonNode.class);
-	}
+
 
 }

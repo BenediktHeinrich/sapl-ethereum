@@ -9,17 +9,3 @@ permit
   action=="access" & resource=="ethereum"
 where
   subject.<ethereum.auth>;
-
-
-/*
-policy "eth_pip_test"
-permit
-  action=="access" & resource=="ethereum"
-where
-  subject.ethAddress == "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
-
-
-policy "simple_test"
-permit action == "a" & resource == "b"
-where subject.ethAddress == "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
-*/

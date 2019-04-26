@@ -124,6 +124,8 @@ public class SaplEthereumPrototypeApplication {
 			
 			logger.info("User1 Response: " + user1access.blockFirst());
 			logger.info("User2 Response: " + user2access.blockFirst());
+			
+			logger.info("Application has finished.");
 
 	    } catch (Exception e) {
 			logger.error("Error in Main Application.");

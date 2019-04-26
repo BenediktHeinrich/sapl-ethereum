@@ -1,5 +1,3 @@
-import EthereumPIP as ethereum
-
 set "eth_policies"
 deny-unless-permit
 

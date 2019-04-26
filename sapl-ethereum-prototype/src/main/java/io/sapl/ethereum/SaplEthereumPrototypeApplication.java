@@ -1,6 +1,10 @@
 package io.sapl.ethereum;
 
 
+import java.io.File;
+import java.util.List;
+
+import org.apache.tools.ant.DirectoryScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -28,9 +32,7 @@ import io.sapl.ethereum.contracts.Authorization;
 @SpringBootApplication
 public class SaplEthereumPrototypeApplication {
 	
-	private static final String USER1_WALLET = "ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2";
-	private static final String USER1 = "0x2678c7e529d61f14f7711053be92d0a923cda8d2";
-	private static final String USER2 = "0x91b6eac43acf5fc115fb30bf8ecc348d1c8d474b";
+	private static final String KEYSTORE = "ethereum-testnet/ptn/keystore/";
 	private static final String ACCESS = "access";
 	private static final String ETHEREUM = "ethereum";
 	
@@ -43,46 +45,73 @@ public class SaplEthereumPrototypeApplication {
 	
 	@EventListener(ApplicationReadyEvent.class)
 	public void ethereumSetup() {
-	    Web3j web3 = Web3j.build(new HttpService());
+	    Web3j web3j = Web3j.build(new HttpService());
 	    try {
-			Credentials credentials = WalletUtils.loadCredentials("", USER1_WALLET);
-			Authorization authContract = Authorization.deploy(web3, credentials, new DefaultGasProvider()).send();
+	    	
+	    	// We create our second user through WalletUtils.
+	    	// First user is the Dev User, which is automatically created through 
+	    	// the --dev option in geth.
+	    	String user2wallet = KEYSTORE + WalletUtils.generateNewWalletFile("", new File(KEYSTORE));
+	    	
+	    	List<String> accounts = web3j.ethAccounts().send().getAccounts();
+	    	String user1 = accounts.get(0);
+	    	String user2 = accounts.get(1);
+	    	
+	    	// Now we have to extract the name of the Wallet File for the Dev User.
+	    	DirectoryScanner scanner = new DirectoryScanner();
+	    	scanner.setIncludes(new String[]{"*" + user1.substring(2)});
+	    	scanner.setBasedir(KEYSTORE);
+	    	scanner.setCaseSensitive(false);
+	    	scanner.scan();
+	    	String[] files = scanner.getIncludedFiles();
+	    	String user1wallet = KEYSTORE + files[0];
+	    	
+	    	
+	    	
+	    	logger.info("WalletFile for User 1: " + user1wallet); 
+	    	logger.info("WalletFile for User 2: " + user2wallet);
 			
+	    	// Now we use the Dev User Account, which already comes with ether, to deploy a new contract.
+	    	// The original contract can be reviewed in the "solidity" folder.
+	    	Credentials credentials = WalletUtils.loadCredentials("", user1wallet);
+			Authorization authContract = Authorization.deploy(web3j, credentials, new DefaultGasProvider()).send();
 			String contractAddress = authContract.getContractAddress();
 			
 			logger.info("Authorization contract deployed under address: " + contractAddress);
 			
+			
+			// In the following section User 2 becomes authorized in the contract.
 			logger.info("User 1 is authorized: " + 
-						authContract.isAuthorized(USER1).send());
+						authContract.isAuthorized(user1).send());
 			logger.info("User 2 is authorized: " + 
-						authContract.isAuthorized(USER2).send());
+						authContract.isAuthorized(user2).send());
 			
 			logger.info("Authorizing User 2...");
-			authContract.authorize(USER2).send();
+			authContract.authorize(user2).send();
 			
 			logger.info("User 1 is authorized: " + 
-					authContract.isAuthorized(USER1).send());
+					authContract.isAuthorized(user1).send());
 			logger.info("User 2 is authorized: " + 
-					authContract.isAuthorized(USER2).send());
+					authContract.isAuthorized(user2).send());
 			
+			
+			// Now we use a PIP to request information from the Ethereum contract.
 			Builder builder = EmbeddedPolicyDecisionPoint.builder();
 			builder = builder.withPolicyInformationPoint(new EthereumTestPIP());
 			EmbeddedPolicyDecisionPoint pdp = builder.build();
 			
-			EthUser user1 = new EthUser(USER1, contractAddress);
-			EthUser user2 = new EthUser(USER2, contractAddress);
+			EthUser ethUser1 = new EthUser(user1, contractAddress);
+			EthUser ethUser2 = new EthUser(user2, contractAddress);
 			
 			ObjectMapper mapper = new ObjectMapper();
 			
-			JsonNode user1json = mapper.convertValue(user1, JsonNode.class);
-			JsonNode user2json = mapper.convertValue(user2, JsonNode.class);
+			JsonNode user1json = mapper.convertValue(ethUser1, JsonNode.class);
+			JsonNode user2json = mapper.convertValue(ethUser2, JsonNode.class);
 			JsonNode accessJson = mapper.convertValue(ACCESS, JsonNode.class);
 			JsonNode ethereumJson = mapper.convertValue(ETHEREUM, JsonNode.class);
 			
 			Request user1Request = new Request(user1json, accessJson, ethereumJson, ethereumJson);
 			Request user2Request = new Request(user2json, accessJson, ethereumJson, ethereumJson);
-			
-
 			
 			Flux<Response> user1access = pdp.decide(user1Request);
 			Flux<Response> user2access = pdp.decide(user2Request);
@@ -91,8 +120,8 @@ public class SaplEthereumPrototypeApplication {
 			logger.info("User2 Response: " + user2access.blockFirst());
 			
 			logger.info("Authorizing now User 1 and unauthorizing User 2...");
-			authContract.authorize(USER1).send();
-			authContract.unauthorize(USER2).send();
+			authContract.authorize(user1).send();
+			authContract.unauthorize(user2).send();
 			
 			user1access = pdp.decide(user1Request);
 			user2access = pdp.decide(user2Request);
@@ -101,7 +130,7 @@ public class SaplEthereumPrototypeApplication {
 			logger.info("User2 Response: " + user2access.blockFirst());
 
 	    } catch (Exception e) {
-			// TODO Auto-generated catch block
+			logger.error("Something went terribly wrong...");
 			e.printStackTrace();
 		}
  

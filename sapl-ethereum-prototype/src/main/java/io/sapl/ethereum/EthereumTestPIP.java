@@ -1,5 +1,6 @@
 package io.sapl.ethereum;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -23,6 +24,8 @@ import io.sapl.ethereum.contracts.Authorization;
 @PolicyInformationPoint(name="ethereum", description="provides functions for connecting with ethereum contracts")
 public class EthereumTestPIP {
 	
+	private static final String KEYSTORE = "ethereum-testnet/ptn/keystore/";
+	
 	private final ObjectMapper mapper = new ObjectMapper();
 	private static final Logger logger = LoggerFactory.getLogger(EthereumTestPIP.class);
 	
@@ -31,13 +34,20 @@ public class EthereumTestPIP {
 	logger.trace("Entered authorized now...");
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
-		Credentials credentials = WalletUtils.loadCredentials("", "/home/bene/ethereum-testnet/ptn/keystore/UTC--2019-04-17T21-39-40.596498485Z--2678c7e529d61f14f7711053be92d0a923cda8d2");
+		
+		List<String> accounts = web3j.ethAccounts().send().getAccounts();
+    	String devUser = accounts.get(0);
+		
+		String devUserWallet = EthServices.getUserWallet(devUser, KEYSTORE);
+		
+		Credentials credentials = WalletUtils.loadCredentials("", devUserWallet);
 		EthUser ethUser = mapper.convertValue(user, EthUser.class);
 		
 		String contractAddress = ethUser.getEthContract();
 		Authorization authContract = Authorization.load(contractAddress , web3j, credentials, new DefaultGasProvider());
 		return mapper.convertValue(authContract.isAuthorized(ethUser.getEthAddress()).send(), JsonNode.class);
 	} catch (Exception e) {
+		logger.error("The EthereumTestPip didn't work as expected.");
 		e.printStackTrace();
 	}
 	System.out.println("Returning null...");

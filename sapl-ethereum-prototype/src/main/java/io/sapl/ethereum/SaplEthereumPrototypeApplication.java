@@ -4,7 +4,6 @@ package io.sapl.ethereum;
 import java.io.File;
 import java.util.List;
 
-import org.apache.tools.ant.DirectoryScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -45,28 +44,25 @@ public class SaplEthereumPrototypeApplication {
 	
 	@EventListener(ApplicationReadyEvent.class)
 	public void ethereumSetup() {
-	    Web3j web3j = Web3j.build(new HttpService());
+		Web3j web3j = Web3j.build(new HttpService());
+
 	    try {
 	    	
 	    	// We create our second user through WalletUtils.
 	    	// First user is the Dev User, which is automatically created through 
 	    	// the --dev option in geth.
 	    	String user2wallet = KEYSTORE + WalletUtils.generateNewWalletFile("", new File(KEYSTORE));
-	    	
+
 	    	List<String> accounts = web3j.ethAccounts().send().getAccounts();
+	    	// Here we have to wait for the new Wallet File to be recognized by the blockchain
+	    	while(accounts.size() < 2) {
+	    		accounts = web3j.ethAccounts().send().getAccounts();
+	    	}
 	    	String user1 = accounts.get(0);
 	    	String user2 = accounts.get(1);
 	    	
 	    	// Now we have to extract the name of the Wallet File for the Dev User.
-	    	DirectoryScanner scanner = new DirectoryScanner();
-	    	scanner.setIncludes(new String[]{"*" + user1.substring(2)});
-	    	scanner.setBasedir(KEYSTORE);
-	    	scanner.setCaseSensitive(false);
-	    	scanner.scan();
-	    	String[] files = scanner.getIncludedFiles();
-	    	String user1wallet = KEYSTORE + files[0];
-	    	
-	    	
+	    	String user1wallet = EthServices.getUserWallet(user1, KEYSTORE);
 	    	
 	    	logger.info("WalletFile for User 1: " + user1wallet); 
 	    	logger.info("WalletFile for User 2: " + user2wallet);
@@ -130,7 +126,7 @@ public class SaplEthereumPrototypeApplication {
 			logger.info("User2 Response: " + user2access.blockFirst());
 
 	    } catch (Exception e) {
-			logger.error("Something went terribly wrong...");
+			logger.error("Error in Main Application.");
 			e.printStackTrace();
 		}
  

@@ -30,6 +30,7 @@ HELP.md
 
 ### Ethereum Testnet ###
 /ethereum-testnet/ptn/geth/*
+/ethereum-testnet/ptn/history
 
 ### attach_pid files ###
 .attach_pid*

@@ -29,7 +29,7 @@ HELP.md
 .vscode/
 
 ### Ethereum Testnet ###
-/ethereum-testnet/ptn/*
+/ethereum-testnet/ptn/geth/*
 
 ### attach_pid files ###
 .attach_pid*

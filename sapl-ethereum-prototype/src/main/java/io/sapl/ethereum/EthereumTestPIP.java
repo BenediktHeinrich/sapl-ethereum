@@ -41,6 +41,7 @@ public class EthereumTestPIP {
 		String devUserWallet = EthServices.getUserWallet(devUser, KEYSTORE);
 		
 		Credentials credentials = WalletUtils.loadCredentials("", devUserWallet);
+
 		EthUser ethUser = mapper.convertValue(user, EthUser.class);
 		
 		String contractAddress = ethUser.getEthContract();

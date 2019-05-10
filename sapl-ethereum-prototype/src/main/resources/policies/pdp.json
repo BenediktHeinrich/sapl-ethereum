@@ -1,6 +1,6 @@
 {
     "algorithm": "DENY_UNLESS_PERMIT",
-    "variables": {},
+    "variables": {"credentials" : {}},
     "attributeFinders": [],
     "libraries": []
 }

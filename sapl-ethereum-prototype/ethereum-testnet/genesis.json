@@ -2,7 +2,7 @@
 
 "config": {
 
-"chainId": "4321"
+"chainId": 2000
 
 },
 
@@ -11,6 +11,7 @@
 "gasLimit":"0x80000000",
 
 "alloc": {
+
 	"70b6613e37616045a80a97e08e930e1e4d800039": { "balance": "100000" },
 
     "3f2cbea2185089ea5bbabbcd7616b215b724885c": { "balance": "100000" },

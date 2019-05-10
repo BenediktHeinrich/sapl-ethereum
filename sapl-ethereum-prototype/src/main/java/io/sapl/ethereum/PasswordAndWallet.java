@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EthUser {
-	
-	private String ethAddress;
-	private String ethContract;
+public class PasswordAndWallet {
+	private String password;
+	private String wallet;
 
 }

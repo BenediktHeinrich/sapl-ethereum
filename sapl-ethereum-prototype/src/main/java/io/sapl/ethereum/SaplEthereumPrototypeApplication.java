@@ -95,22 +95,24 @@ public class SaplEthereumPrototypeApplication {
 			
 			// Now we use a PIP to request information from the Ethereum contract.
 			Builder builder = EmbeddedPolicyDecisionPoint.builder();
+			builder =builder.withResourcePDPConfigurationProvider();
 			builder = builder.withPolicyInformationPoint(new EthereumTestPIP());
 			EmbeddedPolicyDecisionPoint pdp = builder.build();
 			
 			UserAndContract ethUser1 = new UserAndContract(user1, contractAddress);
 			UserAndContract ethUser2 = new UserAndContract(user2, contractAddress);
 			
-			PasswordAndWallet pw = new PasswordAndWallet(PASSWORD, KEYSTORE + USER1WALLET);
 			
 			JsonNode user1json = mapper.convertValue(ethUser1, JsonNode.class);
 			JsonNode user2json = mapper.convertValue(ethUser2, JsonNode.class);
 			JsonNode accessJson = mapper.convertValue(ACCESS, JsonNode.class);
 			JsonNode ethereumJson = mapper.convertValue(ETHEREUM, JsonNode.class);
-			JsonNode pwEnvironment = mapper.convertValue(pw, JsonNode.class);
 			
-			Request user1Request = new Request(user1json, accessJson, ethereumJson, pwEnvironment);
-			Request user2Request = new Request(user2json, accessJson, ethereumJson, pwEnvironment);
+			
+			Request user1Request = new Request(user1json, accessJson, ethereumJson, null);
+			Request user2Request = new Request(user2json, accessJson, ethereumJson, null);
+			
+			
 			
 			Flux<Response> user1access = pdp.decide(user1Request);
 			Flux<Response> user2access = pdp.decide(user2Request);

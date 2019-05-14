@@ -36,7 +36,7 @@ public class EthereumTestPIP {
 	Web3j web3j = Web3j.build(new HttpService());
 	try {
 		
-		logger.info("VARBIABLES: " + variables);
+		logger.trace("VARBIABLES: " + variables);
 		
 		String password = variables.get("ethPassword").textValue();
 		String wallet = variables.get("ethWallet").textValue();
@@ -56,6 +56,32 @@ public class EthereumTestPIP {
 	}
 	logger.debug("Returning empty Flux...");
 	return Flux.empty();
+	}
+	
+	@Attribute(name="authPol", docs="check if a user is authorized with credentials in Policy") 
+	public Flux<JsonNode> authorizedWithPolicy(JsonNode combinedUser, Map<String, JsonNode> variables) {
+		Web3j web3j = Web3j.build(new HttpService());
+		try {
+			logger.trace("COMBINED USER: " + combinedUser);
+			
+			String password = combinedUser.get("password").textValue();
+			String wallet = combinedUser.get("walletFile").textValue();
+			String contractAddress = combinedUser.get("ethContract").textValue();
+			String ethAddress = combinedUser.get("ethAddress").textValue();
+			
+			Credentials credentials = WalletUtils.loadCredentials(password, wallet);
+			Authorization authContract = Authorization.load(contractAddress , web3j, credentials, new DefaultGasProvider());
+			JsonNode authResponse = mapper.convertValue(authContract.isAuthorized(ethAddress).send(), JsonNode.class);
+			Flux<JsonNode> authFlux = Flux.just(authResponse);
+			return authFlux;
+			
+		} catch (Exception e) {
+			logger.error("authorizedWithPolicy didn't work");
+			e.printStackTrace();
+		}
+		
+		logger.debug("Returning empty Flux...");
+		return Flux.empty();
 	}
 
 

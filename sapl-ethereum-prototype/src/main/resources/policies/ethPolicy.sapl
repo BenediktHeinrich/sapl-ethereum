@@ -9,3 +9,15 @@ where
   subject.<ethereum.authEnv>;
 
 
+policy "eth_policy_with_credentials"
+permit
+  action=="access" & resource=="ethPolicy"
+where
+  var combined_user = 
+  { 
+              "ethAddress"   : subject.ethAddress,
+              "ethContract" : subject.ethContract,
+              "password"    : "", 
+              "walletFile"  : "ethereum-testnet/ptn/keystore/UTC--2019-05-10T11-32-05.64000000Z--70b6613e37616045a80a97e08e930e1e4d800039.json"
+  };
+  combined_user.<ethereum.authPol>;

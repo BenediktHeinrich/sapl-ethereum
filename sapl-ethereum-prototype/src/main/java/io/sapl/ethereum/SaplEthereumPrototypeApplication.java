@@ -45,6 +45,7 @@ public class SaplEthereumPrototypeApplication {
 	
 	private static final String ACCESS = "access";
 	private static final String ETHEREUM = "ethereum";
+	private static final String ETH_POLICY = "ethPolicy";
 	
 	private static final ObjectMapper mapper = new ObjectMapper();
 	
@@ -65,9 +66,7 @@ public class SaplEthereumPrototypeApplication {
 	    	List<String> accounts = web3j.ethAccounts().send().getAccounts();
 	    	String user1 = accounts.get(0);
 	    	String user2 = accounts.get(1);
-	    	
-	    	logger.info(user1);
-	    	logger.info(user2);
+
 			
 	    	// Now we use the first User Account, which already comes with ether, to deploy a new contract.
 	    	// The original contract can be reviewed in the "solidity" folder.
@@ -75,10 +74,13 @@ public class SaplEthereumPrototypeApplication {
 			Authorization authContract = Authorization.deploy(web3j, credentials, new DefaultGasProvider()).send();
 			String contractAddress = authContract.getContractAddress();
 			
+			logger.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 			logger.info("Authorization contract deployed under address: " + contractAddress);
-
+			logger.info("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 
 			// In the following section User 2 becomes authorized in the contract.
+			
+			logger.info("-------------ETHEREUM CONTRACT USAGE------------------------------------------");		
 			logger.info("User 1 is authorized: " + 
 						authContract.isAuthorized(user1).send());
 			logger.info("User 2 is authorized: " + 
@@ -91,6 +93,7 @@ public class SaplEthereumPrototypeApplication {
 					authContract.isAuthorized(user1).send());
 			logger.info("User 2 is authorized: " + 
 					authContract.isAuthorized(user2).send());
+			logger.info("----------------------------------------------------------------------------");
 			
 			
 			// Now we use a PIP to request information from the Ethereum contract.
@@ -107,19 +110,33 @@ public class SaplEthereumPrototypeApplication {
 			JsonNode user2json = mapper.convertValue(ethUser2, JsonNode.class);
 			JsonNode accessJson = mapper.convertValue(ACCESS, JsonNode.class);
 			JsonNode ethereumJson = mapper.convertValue(ETHEREUM, JsonNode.class);
+			JsonNode ethPolicyJson = mapper.convertValue(ETH_POLICY, JsonNode.class);
 			
 			
 			Request user1Request = new Request(user1json, accessJson, ethereumJson, null);
 			Request user2Request = new Request(user2json, accessJson, ethereumJson, null);
-			
+			Request user1EthPolicyRequest = new Request(user1json, accessJson, ethPolicyJson, null); 
+			Request user2EthPolicyRequest = new Request(user2json, accessJson, ethPolicyJson, null);
 			
 			
 			Flux<Response> user1access = pdp.decide(user1Request);
 			Flux<Response> user2access = pdp.decide(user2Request);
 			
-			logger.info("User1 Response: " + user1access.blockFirst());
-			logger.info("User2 Response: " + user2access.blockFirst());
+			Flux<Response> user1PolAccess = pdp.decide(user1EthPolicyRequest);
+			Flux<Response> user2PolAccess = pdp.decide(user2EthPolicyRequest);
 			
+			
+			logger.info("----------------------------------------------------------------------------");
+			logger.info("--------USING ETHEREUM WITH CREDENTIALS SAVED IN PDP.JSON-------------------");
+			logger.info("User1 Environment Response: " + user1access.blockFirst());
+			logger.info("User2 Environment Response: " + user2access.blockFirst());
+			
+			logger.info("----------------------------------------------------------------------------");
+			logger.info("--------USING ETHEREUM WITH CREDENTIALS FROM POLICY-------------------------");
+			logger.info("User1 EthPolicy Response: " + user1PolAccess.blockFirst());
+			logger.info("User2 EthPolicy Response: " + user2PolAccess.blockFirst());
+			
+			logger.info("----------------------------------------------------------------------------");
 			logger.info("Authorizing now User 1 and unauthorizing User 2...");
 			authContract.authorize(user1).send();
 			authContract.unauthorize(user2).send();
@@ -127,8 +144,18 @@ public class SaplEthereumPrototypeApplication {
 			user1access = pdp.decide(user1Request);
 			user2access = pdp.decide(user2Request);
 			
-			logger.info("User1 Response: " + user1access.blockFirst());
-			logger.info("User2 Response: " + user2access.blockFirst());
+			user1PolAccess = pdp.decide(user1EthPolicyRequest);
+			user2PolAccess = pdp.decide(user2EthPolicyRequest);
+			
+			logger.info("----------------------------------------------------------------------------");
+			logger.info("--------USING ETHEREUM WITH CREDENTIALS SAVED IN PDP.JSON-------------------");
+			logger.info("User1 Environment Response: " + user1access.blockFirst());
+			logger.info("User2 Environment Response: " + user2access.blockFirst());
+			
+			logger.info("----------------------------------------------------------------------------");
+			logger.info("--------USING ETHEREUM WITH CREDENTIALS FROM POLICY-------------------------");
+			logger.info("User1 EthPolicy Response: " + user1PolAccess.blockFirst());
+			logger.info("User2 EthPolicy Response: " + user2PolAccess.blockFirst());
 			
 			logger.info("Application has terminated.");
 

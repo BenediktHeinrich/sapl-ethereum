@@ -1,7 +1,10 @@
 package io.sapl.ethereum;
 
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +16,13 @@ import org.springframework.context.event.EventListener;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.WalletUtils;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthTransaction;
+import org.web3j.protocol.core.methods.response.Transaction;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
+import org.web3j.tx.Transfer;
 import org.web3j.tx.gas.DefaultGasProvider;
+import org.web3j.utils.Convert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -66,11 +74,32 @@ public class SaplEthereumPrototypeApplication {
 	    	List<String> accounts = web3j.ethAccounts().send().getAccounts();
 	    	String user1 = accounts.get(0);
 	    	String user2 = accounts.get(1);
+	    	String user3 = accounts.get(2);
+	    	String user4 = accounts.get(3);
+	    	
+	    	logger.info("List of users: \nUser1: " + user1 + "\nUser2: " + user2 + "\nUser3: " + user3 + "\nUser4: " + user4);
+	    	
+	    	// We make some transactions
+	    	Credentials credentials = WalletUtils.loadCredentials("", KEYSTORE + USER1WALLET);
+	    	TransactionReceipt transactionReceiptUser2 = Transfer.sendFunds(
+	    	        web3j, credentials, user2,
+	    	        BigDecimal.valueOf(2.0), Convert.Unit.ETHER).send();
+	    	TransactionReceipt transactionReceiptUser3 = Transfer.sendFunds(
+	    	        web3j, credentials, user3,
+	    	        BigDecimal.valueOf(3.3), Convert.Unit.ETHER).send();
+	    	TransactionReceipt transactionReceiptUser4 = Transfer.sendFunds(
+	    	        web3j, credentials, user4,
+	    	        BigDecimal.valueOf(4.444), Convert.Unit.ETHER).send();
+	    	EthTransaction transaction = web3j.ethGetTransactionByHash(transactionReceiptUser2.getTransactionHash()).send();
+	    	Optional<Transaction> optTrans = transaction.getTransaction();
+	    	Transaction trans = optTrans.get();
+	    	logger.info("Transaction Receipts: \nUser2: " + transactionReceiptUser2 + "\nUser3: " + transactionReceiptUser3
+	    			+ "\nUser4: " + transactionReceiptUser4);
+	    	logger.info("TRANSACTION VALUE: " + trans.getValue());
 
 			
 	    	// Now we use the first User Account, which already comes with ether, to deploy a new contract.
 	    	// The original contract can be reviewed in the "solidity" folder.
-	    	Credentials credentials = WalletUtils.loadCredentials("", KEYSTORE + USER1WALLET);
 			Authorization authContract = Authorization.deploy(web3j, credentials, new DefaultGasProvider()).send();
 			String contractAddress = authContract.getContractAddress();
 			
